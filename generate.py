@@ -20,14 +20,18 @@ def that_or_and(order):
 
 def generate_nl(mr_instance):
     nl = ''
-    order = 0
+    order_0 = 0
+    order_1 = 0
     for mr_type, mr_val in mr_instance:
         if mr_type == 'name':
             nl += mr_val
         elif mr_type == 'eatType':
             nl += (' is a ' + mr_val)
+            order_1 += 1
         elif mr_type == 'food':
-            nl += ' that serves '
+            if(order_1 > 0):
+                nl += ' that'
+            nl += ' serves '
             if 'food' in mr_val:
                 nl += mr_val
             else:
@@ -40,22 +44,24 @@ def generate_nl(mr_instance):
         elif mr_type == 'customer rating':
             nl += (' with a ' + mr_val + ' customer rating')
         elif mr_type == 'familyFriendly':
-            nl += that_or_and(order) + 'is '
+            nl += that_or_and(order_0) + 'is '
             if mr_val == 'no':
                 nl += 'not '
             nl += 'family friendly'
-            order += 1
+            order_0 += 1
         elif mr_type == 'near':
-            nl += that_or_and(order) + 'is near ' + mr_val
-            order += 1
+            nl += that_or_and(order_0) + 'is near ' + mr_val
+            order_0 += 1
         elif mr_type == 'area':
-            nl += that_or_and(order) + 'is located in ' + mr_val
-            order += 1
+            nl += that_or_and(order_0) + 'is located in ' + mr_val
+            order_0 += 1
+    nl += '.'
     return nl
 
 
 if __name__ == '__main__':
     dataset_dir = 'e2e-dataset'
+    result_dir = 'results'
     for split in ['train', 'dev', 'test']:
         data_csv = pd.read_csv(os.path.join(dataset_dir, split + 'set.csv'))
         data_mr = None
@@ -67,4 +73,6 @@ if __name__ == '__main__':
         nls = []
         for i in parsed_mr:
             nls.append(generate_nl(i))
-        #print(nls)
+        result_file = open(os.path.join(result_dir, split + '_rb_gen.txt'), 'w', encoding='utf-8')
+        for nl in nls:
+            result_file.write(nl + '\n')
